@@ -5,16 +5,18 @@ import * as cors from 'kcors';
 import { statusCheck } from './routes/status-check';
 import { handleErrors, corsRules } from './middleware';
 import { initApiRoutes } from './routes/api/api-routes';
+import { Connection } from 'typeorm';
 
-export const createApp = () => {
-  const app: koa = new koa();
-  const router: Router = new Router();
+export const createApp = (connection: Connection): koa<koa.DefaultState, koa.DefaultContext> => {
+  const app = new koa();
+  const router = new Router();
 
   app.use(handleErrors);
   app.use(bodyParser());
   app.use(cors({ origin: corsRules, credentials: true }));
+
+  initApiRoutes(router, connection);
   router.get('/status-check', statusCheck);
-  initApiRoutes(router);
 
   app.use(router.routes());
 

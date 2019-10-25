@@ -1,6 +1,5 @@
 import { NotFoundError } from '../../lib/error';
 import { fileData } from '../../db/data/files';
-import { fileMapping } from './file-column-mapping';
 
 export interface FileModel {
   id: number;
@@ -73,9 +72,7 @@ export class FileModel implements FileModel {
 
   public setFieldsFromRequest(obj: object): void {
     for (const field in obj) {
-      if (obj.hasOwnProperty(field) && fileMapping.columns.includes(field)) {
-        this.setField(field, obj[field]);
-      }
+      this.setField(field, obj[field]);
     }
   }
 

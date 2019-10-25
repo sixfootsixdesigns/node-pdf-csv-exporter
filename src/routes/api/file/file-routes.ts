@@ -6,6 +6,8 @@ import { buildResponseBody } from '../../../lib/response';
 import { ValidationError } from '../../../lib/error';
 import { FileModel } from '../../../models/file/file-model';
 import { FileBuilder } from '../../../models/file/file-builder';
+import { Connection } from 'typeorm';
+import * as Router from 'koa-router';
 
 async function insert(ctx, next) {
   const file: FileModel = FileBuilder.buildFileFromRequest(ctx.request.body);
@@ -53,7 +55,7 @@ async function downloadLink(ctx, next) {
   ctx.body = buildResponseBody({ downloadUrl: url });
 }
 
-export const initFileRoutes = router => {
+export const initFileRoutes = (router: Router, connection: Connection) => {
   router.post('/file/create', insert);
   router.post('/file/update', update);
   router.get('/file/download', downloadLink);

@@ -11,9 +11,7 @@
     "lint": "eslint --ext js --ext jsx --ext ts --ext tsx src",
     "start": "./scripts/start.sh",
     "test:migrate": "db:migrate test",
-    "test": "mocha --opts mocha.opts $(find src/__tests__ -name '*.ts')",
-    "db:migrate": "./scripts/migrate-db.sh",
-    "db:seed": "./scripts/seed-db.sh"
+    "test": "mocha --opts mocha.opts $(find src/__tests__ -name '*.ts')"
   },
   "dependencies": {
     "aws-sdk": "^2.556.0",
@@ -32,6 +30,7 @@
     "prettysize": "^2.0.0",
     "puppeteer": "^2.0.0",
     "request": "2.88.0",
+    "typeorm": "^0.2.20",
     "typescript": "^3.5.0"
   },
   "devDependencies": {

@@ -1,18 +1,15 @@
 import { config } from 'dotenv';
-
 config();
-
-import { connect as connectDb } from './db';
+import { createConnection } from 'typeorm';
 import { createApp } from './app';
 
 const port = process.env.PORT || 3000;
 
-const app = createApp();
-
-connectDb();
-
-app.listen(port, () => {
-  console.log('info', `app is listening on port ${port}`, 'application');
+createConnection().then(connection => {
+  const app = createApp(connection);
+  app.listen(port, () => {
+    console.log('info', `app is listening on port ${port}`, 'application');
+  });
 });
 
 process
