@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": false,
+    "esModuleInterop": false,
+    "experimentalDecorators": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "outDir": "dist",
+    "sourceMap": true,
+    "target": "es6"
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["./src/__tests__/**/*"]
+}

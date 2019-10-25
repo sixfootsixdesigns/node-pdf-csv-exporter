@@ -1,0 +1,3 @@
+--require src/__tests__/test.common.js
+--watch-extensions ts
+--timeout 5000
