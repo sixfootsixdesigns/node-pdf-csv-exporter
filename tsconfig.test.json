@@ -2,6 +2,7 @@
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": false,
+    "emitDecoratorMetadata": true,
     "esModuleInterop": false,
     "experimentalDecorators": true,
     "module": "commonjs",

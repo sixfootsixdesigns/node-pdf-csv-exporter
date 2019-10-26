@@ -1,14 +1,11 @@
-import * as InsertController from './insert-controller';
-import * as SearchController from './search-controller';
-import * as UpdateController from './update-controller';
-import * as DownloadController from './download-controller';
 import { buildResponseBody } from '../../../lib/response';
-import { ValidationError } from '../../../lib/error';
-import { FileModel } from '../../../models/file/file-model';
-import { FileBuilder } from '../../../models/file/file-builder';
 import { Connection } from 'typeorm';
 import * as Router from 'koa-router';
-
+import * as Koa from 'koa';
+import { File } from '../../../entity/File';
+import { validate } from 'class-validator';
+import { ValidationError } from '../../../lib/error';
+/*
 async function insert(ctx, next) {
   const file: FileModel = FileBuilder.buildFileFromRequest(ctx.request.body);
   const fileJson = ctx.request.body.data || null;
@@ -54,10 +51,21 @@ async function downloadLink(ctx, next) {
   const url = await DownloadController.download(ctx.query.fileId, uuid);
   ctx.body = buildResponseBody({ downloadUrl: url });
 }
+*/
 
 export const initFileRoutes = (router: Router, connection: Connection) => {
-  router.post('/file/create', insert);
-  router.post('/file/update', update);
-  router.get('/file/download', downloadLink);
-  router.get('/file', search);
+  const repository = connection.getRepository(File);
+  router.post('/file/create', async (ctx: Koa.ParameterizedContext) => {
+    const fileData = repository.create(ctx.request.body);
+    const errors = await validate(fileData);
+    if (errors.length > 0) {
+      throw new ValidationError('Invalid data', this);
+    } else {
+      const results = await repository.save(fileData);
+      ctx.body = buildResponseBody(results);
+    }
+  });
+  // router.post('/file/update', update);
+  // router.get('/file/download', downloadLink);
+  // router.get('/file', search);
 };

@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { IsOptional, IsNotEmpty, IsEnum } from 'class-validator';
 
 export enum ExportStatus {
   SUCCESS = 'success',
@@ -24,27 +25,33 @@ export class File extends BaseEntity {
   id: number;
 
   @Column()
+  @IsNotEmpty()
   uuid: string;
 
   @Column()
+  @IsNotEmpty()
   name: string;
 
   @Column({
     type: 'enum',
     enum: ExportFileTypes,
   })
+  @IsEnum(ExportFileTypes)
   type: ExportFileTypes;
 
-  @Column()
+  @Column({ nullable: true })
   path: string;
 
   @Column({
     type: 'enum',
     enum: ExportStatus,
+    nullable: true,
+    default: ExportStatus.PENDING,
   })
+  @IsOptional()
   status: ExportStatus;
 
-  @Column()
+  @Column({ nullable: true })
   size: string;
 
   @CreateDateColumn()
