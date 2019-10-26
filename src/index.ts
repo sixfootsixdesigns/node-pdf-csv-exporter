@@ -6,7 +6,7 @@ import { createApp } from './app';
 const port = process.env.PORT || 3000;
 
 createConnection().then(connection => {
-  const app = createApp(connection);
+  const app = createApp();
   app.listen(port, () => {
     console.log('info', `app is listening on port ${port}`, 'application');
   });

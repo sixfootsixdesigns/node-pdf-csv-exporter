@@ -1,0 +1,17 @@
+import { head } from './head';
+
+interface GetPdfOptions {
+  headData?: string;
+  bodyData?: string;
+}
+
+export const getPdf = (options?: GetPdfOptions) => {
+  const { headData = '', bodyData = 'hi' } = options;
+  return `<!doctype html>
+    <html lang="en">
+      <head>${head(headData)}</head>
+      <body>
+        ${bodyData}
+      </body>
+    </html>`;
+};

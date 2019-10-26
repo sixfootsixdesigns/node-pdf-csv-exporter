@@ -3,7 +3,7 @@ export interface ResponseBody {
   data: any;
 }
 
-export function buildResponseBody(data, statusMessage = 'OK'): ResponseBody {
+export function buildResponseBody(data: any, statusMessage = 'OK'): ResponseBody {
   return {
     message: statusMessage,
     data,

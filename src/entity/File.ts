@@ -59,4 +59,12 @@ export class File extends BaseEntity {
 
   @UpdateDateColumn()
   public updated: Date;
+
+  public getKey() {
+    return `${this.id}.${this.type}`;
+  }
+
+  public getFileName() {
+    return `${this.name}.${this.type}`;
+  }
 }

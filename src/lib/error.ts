@@ -9,23 +9,6 @@ interface ErrorResponse extends ResponseBody {
   data: ErrorMessage;
 }
 
-class DatabaseError extends Error {
-  public response: ErrorResponse;
-  public status: number;
-  public context: any;
-
-  constructor(message: string, context?: any, status = 400) {
-    super(message);
-    this.status = status;
-    this.context = context || null;
-    this.response = buildResponseBody({ errors: message }, 'Bad Request');
-
-    // Hack because transpiling to es5
-    // https://stackoverflow.com/questions/41102060/typescript-extending-error-class
-    Object.setPrototypeOf(this, DatabaseError.prototype);
-  }
-}
-
 class ValidationError extends Error {
   public response: ErrorResponse;
   public status: number;
@@ -77,4 +60,4 @@ class NotFoundError extends Error {
   }
 }
 
-export { AWSError, ErrorResponse, ErrorMessage, DatabaseError, NotFoundError, ValidationError };
+export { AWSError, ErrorResponse, ErrorMessage, NotFoundError, ValidationError };

@@ -3,48 +3,35 @@ import * as Handlebars from 'handlebars';
 import { Parser } from 'json2csv';
 import * as pretty from 'prettysize';
 import * as puppeteer from 'puppeteer';
-import { FileModel } from '../../../models/file/file-model';
-import { ExportFileTypes } from './export-types';
-import { User } from '../../../lib/user';
-import { getPDF } from './pdf-templates';
+import { File, ExportFileTypes } from '../entity/File';
+import { getPdf } from '../pdf-layouts/getPdf';
+import { ValidationError } from './error';
+
+interface ExportResult {
+  size: string;
+  saved: boolean;
+}
 
 export class Exporter {
-  public fileData: FileModel;
-  public userData: User;
+  public file: File;
   public exportData: any;
   public s3: S3;
 
-  constructor(s3: any, file: FileModel, user: User, data: any) {
+  constructor(s3: S3, file: File, data: any) {
     this.s3 = s3;
     this.registerHandlebarHelpers();
-    this.fileData = file;
-    this.userData = user;
+    this.file = file;
     this.exportData = data;
   }
 
-  public async export(): Promise<any> {
-    if (!this.fileData) {
-      throw new Error('File data not found');
-    }
-
-    if (this.fileData.type !== ExportFileTypes.PDF && this.fileData.type !== ExportFileTypes.CSV) {
-      throw new Error(`File type ${this.fileData.type} is not supported`);
-    }
-
-    if (!this.userData) {
-      throw new Error('User data not found');
-    }
-
+  public async export(): Promise<ExportResult> {
     if (!this.exportData) {
-      throw new Error('Property data not found');
+      throw new ValidationError('data not found');
     }
 
-    // set path based on name and type
-    this.fileData.path = `${this.fileData.getFileName()}.${this.fileData.type}`;
-
-    switch (this.fileData.type) {
+    switch (this.file.type) {
       case ExportFileTypes.PDF:
-        const puppeteerArgs: any = {};
+        const puppeteerArgs: puppeteer.LaunchOptions = {};
         if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'production') {
           puppeteerArgs.args = ['--no-sandbox', '--disable-setuid-sandbox'];
         }
@@ -66,31 +53,32 @@ export class Exporter {
         const pdf: Buffer = await page.pdf(options);
 
         await browser.close();
-
-        this.fileData.size = pretty(pdf.byteLength);
-
         await this.saveToBucket(pdf);
 
-        return true;
+        return {
+          size: pretty(pdf.byteLength),
+          saved: true,
+        };
 
       case ExportFileTypes.CSV:
         const csv = this.getCSV();
 
-        this.fileData.size = pretty(csv.byteLength);
-
         await this.saveToBucket(csv);
 
-        return true;
+        return {
+          size: pretty(csv.byteLength),
+          saved: true,
+        };
 
       default:
-        throw new Error('export type not set, nothing to export');
+        throw new ValidationError('export type not set, nothing to export');
     }
   }
 
   public async saveToBucket(file: Buffer): Promise<S3.PutObjectOutput> {
     const params = {
-      Bucket: process.env.AWS_EXPORT_PROCESSED_BUCKET,
-      Key: this.fileData.path,
+      Bucket: process.env.AWS_EXPORT_BUCKET,
+      Key: this.file.getKey(),
       Body: file,
     };
     return this.s3.putObject(params).promise();
@@ -113,10 +101,9 @@ export class Exporter {
   }
 
   public getPdfHtml(): string {
-    const template = Handlebars.compile(getPDF());
+    const template = Handlebars.compile(getPdf());
     return template({
       exportData: this.exportData,
-      userData: this.userData,
     });
   }
 

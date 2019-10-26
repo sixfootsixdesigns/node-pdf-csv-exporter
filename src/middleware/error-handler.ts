@@ -1,4 +1,4 @@
-import { ValidationError, NotFoundError, DatabaseError } from '../lib/error';
+import { ValidationError, NotFoundError } from '../lib/error';
 
 export const handleErrors = async (ctx, next) => {
   try {
@@ -9,11 +9,7 @@ export const handleErrors = async (ctx, next) => {
       ctx.state.error = err;
       console.log('info', message, err.status);
       ctx.throw(err.status, message);
-    } else if (
-      err instanceof ValidationError ||
-      err instanceof NotFoundError ||
-      err instanceof DatabaseError
-    ) {
+    } else if (err instanceof ValidationError || err instanceof NotFoundError) {
       ctx.status = err.status;
       ctx.state.error = err;
       ctx.state.context = err.context || null;

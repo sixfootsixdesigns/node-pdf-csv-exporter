@@ -1,4 +1,4 @@
-const head = `<meta charset="utf-8">
+export const head = (data?: string) => `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
 <style>
@@ -13,14 +13,4 @@ const head = `<meta charset="utf-8">
   body {
     padding: 20px;
   }
-</style>`;
-
-export const getPDF = () => {
-  return `<!doctype html>
-    <html lang="en">
-      <head>${head}</head>
-      <body>
-        hey hey
-      </body>
-    </html>`;
-};
+</style>${data}`;
