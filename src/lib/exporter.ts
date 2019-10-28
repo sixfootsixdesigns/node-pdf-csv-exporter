@@ -1,30 +1,24 @@
 import { S3 } from 'aws-sdk';
 import * as Handlebars from 'handlebars';
 import { Parser } from 'json2csv';
-import * as pretty from 'prettysize';
 import * as puppeteer from 'puppeteer';
-import { File, ExportFileTypes } from '../entity/File';
-import { getPdf } from '../pdf-layouts/getPdf';
+import { ExportFile, ExportFileTypes, ExportFileData } from '../entity/ExportFile';
+import { getPdf } from '../pdf-layouts/get-pdf';
 import { ValidationError } from './error';
 
-interface ExportResult {
-  size: string;
-  saved: boolean;
-}
-
 export class Exporter {
-  public file: File;
-  public exportData: any;
+  public file: ExportFile;
+  public exportData: ExportFileData;
   public s3: S3;
 
-  constructor(s3: S3, file: File, data: any) {
+  constructor(s3: S3, file: ExportFile, data: ExportFileData) {
     this.s3 = s3;
     this.registerHandlebarHelpers();
     this.file = file;
     this.exportData = data;
   }
 
-  public async export(): Promise<ExportResult> {
+  public async export(): Promise<boolean> {
     if (!this.exportData) {
       throw new ValidationError('data not found');
     }
@@ -55,20 +49,11 @@ export class Exporter {
         await browser.close();
         await this.saveToBucket(pdf);
 
-        return {
-          size: pretty(pdf.byteLength),
-          saved: true,
-        };
+        return true;
 
       case ExportFileTypes.CSV:
-        const csv = this.getCSV();
-
-        await this.saveToBucket(csv);
-
-        return {
-          size: pretty(csv.byteLength),
-          saved: true,
-        };
+        await this.saveToBucket(this.getCSV());
+        return true;
 
       default:
         throw new ValidationError('export type not set, nothing to export');
@@ -76,8 +61,8 @@ export class Exporter {
   }
 
   public async saveToBucket(file: Buffer): Promise<S3.PutObjectOutput> {
-    const params = {
-      Bucket: process.env.AWS_EXPORT_BUCKET,
+    const params: S3.PutObjectRequest = {
+      Bucket: process.env.AWS_BUCKET || '',
       Key: this.file.getKey(),
       Body: file,
     };
@@ -85,19 +70,14 @@ export class Exporter {
   }
 
   public getCSV(): Buffer {
-    let fields;
-    let opts = null;
-    if (this.exportData.fields) {
-      fields = this.exportData.fields;
-    } else {
-      fields = Object.keys(this.exportData.properties[0]).sort();
+    if (!this.exportData.csvData || !this.exportData.csvData.length) {
+      throw new ValidationError('no csvData sent');
     }
-    if (fields) {
-      opts = { fields };
-    }
-    const parser = new Parser(opts);
-    const csv = parser.parse(this.exportData.properties);
-    return Buffer.from(csv);
+
+    const fields = this.exportData.csvFields || Object.keys(this.exportData.csvData[0]);
+    const parser = new Parser({ fields });
+
+    return Buffer.from(parser.parse(this.exportData.csvData));
   }
 
   public getPdfHtml(): string {

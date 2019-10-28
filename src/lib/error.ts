@@ -13,9 +13,11 @@ class ValidationError extends Error {
   public response: ErrorResponse;
   public status: number;
   public context: any;
+  public name: string;
 
   constructor(message: string, context?: any, status = 400) {
     super(message);
+    this.name = 'ValidationError';
     this.status = status;
     this.context = context || null;
     this.response = buildResponseBody({ errors: message }, 'Bad Request');
@@ -30,9 +32,11 @@ class AWSError extends Error {
   public response: ErrorResponse;
   public status: number;
   public context: any;
+  public name: string;
 
   constructor(message: string, context?: any, status = 500) {
     super(message);
+    this.name = 'AWSError';
     this.status = status;
     this.context = context || null;
     this.response = buildResponseBody({ errors: message }, 'AWS Error');
@@ -47,9 +51,11 @@ class NotFoundError extends Error {
   public response: ErrorResponse;
   public status: number;
   public context: any;
+  public name: string;
 
   constructor(message: string, context?: any, status = 404) {
     super(message);
+    this.name = 'NotFoundError';
     this.status = status;
     this.context = context || null;
     this.response = buildResponseBody({ errors: message }, 'Not Found');

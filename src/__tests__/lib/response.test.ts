@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import { buildResponseBody } from '../../lib/response';
 
 describe('response', () => {
@@ -9,7 +8,7 @@ describe('response', () => {
 
     const resp = buildResponseBody(data);
 
-    expect(resp).to.deep.equal({
+    expect(resp).toEqual({
       message: 'OK',
       data: {
         name: 'foo',
@@ -24,7 +23,7 @@ describe('response', () => {
 
     const resp = buildResponseBody(data, 'GOOD');
 
-    expect(resp).to.deep.equal({
+    expect(resp).toEqual({
       message: 'GOOD',
       data: {
         name: 'foo',
