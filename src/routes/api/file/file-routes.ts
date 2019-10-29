@@ -2,29 +2,27 @@ import { buildResponseBody } from '../../../lib/response';
 import { getRepository } from 'typeorm';
 import * as Router from 'koa-router';
 import * as Koa from 'koa';
-import { ExportFile, ExportFileStatus } from '../../../entity/ExportFile';
-import { validate } from 'class-validator';
-import { ValidationError } from '../../../lib/error';
+import { ExportFile } from '../../../entity/ExportFile';
+import { ApiValidationError } from '../../../lib/error';
 
 async function insert(ctx: Koa.ParameterizedContext) {
   const repository = getRepository(ExportFile);
   const { data, ...exportFile } = ctx.request.body;
 
   if (!data) {
-    throw new ValidationError('You must send data');
+    throw new ApiValidationError('You must send data');
   }
 
   const file = repository.create(exportFile);
-  const errors = await validate(file);
+  const result = await repository.save(file);
 
-  if (errors.length > 0) {
-    throw new ValidationError('Invalid data', this);
-  } else {
-    const result = await repository.save(file);
-    const singularResult = Array.isArray(result) ? result[0] : result;
-    singularResult.processExport(data);
-    ctx.body = buildResponseBody(result);
-  }
+  const singularResult = Array.isArray(result) ? result[0] : result;
+
+  singularResult.processExport(data).then(() => {
+    // don't care
+  });
+
+  ctx.body = buildResponseBody(result);
 }
 
 async function updateById(ctx: Koa.ParameterizedContext) {
@@ -33,19 +31,16 @@ async function updateById(ctx: Koa.ParameterizedContext) {
 
   repository.merge(fileData, ctx.request.body);
 
-  const errors = await validate(fileData);
+  const results = await repository.save(fileData);
 
-  if (errors.length > 0) {
-    throw new ValidationError('Invalid data', this);
-  } else {
-    const results = await repository.save(fileData);
-    ctx.body = buildResponseBody(results);
-  }
+  ctx.body = buildResponseBody(results);
 }
 
 async function getDownloadLinkById(ctx: Koa.ParameterizedContext) {
   const repository = getRepository(ExportFile);
+
   const fileData = await repository.findOneOrFail(ctx.params.id);
+
   ctx.body = buildResponseBody({ downloadUrl: fileData.getDownloadUrl() });
 }
 

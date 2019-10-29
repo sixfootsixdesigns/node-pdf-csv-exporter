@@ -4,7 +4,7 @@ import { Parser } from 'json2csv';
 import * as puppeteer from 'puppeteer';
 import { ExportFile, ExportFileTypes, ExportFileData } from '../entity/ExportFile';
 import { getPdf } from '../pdf-layouts/get-pdf';
-import { ValidationError } from './error';
+import { ApiValidationError } from './error';
 
 export class Exporter {
   public file: ExportFile;
@@ -20,7 +20,7 @@ export class Exporter {
 
   public async export(): Promise<boolean> {
     if (!this.exportData) {
-      throw new ValidationError('data not found');
+      throw new ApiValidationError('data not found');
     }
 
     switch (this.file.type) {
@@ -34,9 +34,7 @@ export class Exporter {
 
         const page = await browser.newPage();
 
-        const html = this.getPdfHtml();
-
-        await page.goto(`data:text/html,${html}`, {
+        await page.goto(`data:text/html,${this.getPdfHtml()}`, {
           waitUntil: 'networkidle0',
         });
 
@@ -56,7 +54,7 @@ export class Exporter {
         return true;
 
       default:
-        throw new ValidationError('export type not set, nothing to export');
+        throw new ApiValidationError('export type not set, nothing to export');
     }
   }
 
@@ -71,7 +69,7 @@ export class Exporter {
 
   public getCSV(): Buffer {
     if (!this.exportData.csvData || !this.exportData.csvData.length) {
-      throw new ValidationError('no csvData sent');
+      throw new ApiValidationError('no csvData sent');
     }
 
     const fields = this.exportData.csvFields || Object.keys(this.exportData.csvData[0]);

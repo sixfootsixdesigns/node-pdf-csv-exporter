@@ -5,10 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
+  BeforeInsert,
+  BeforeUpdate,
 } from 'typeorm';
 import { IsOptional, IsNotEmpty, IsEnum } from 'class-validator';
 import { S3 } from 'aws-sdk';
 import { Exporter } from '../lib/exporter';
+import { validateOrReject } from 'class-validator';
 
 export interface ExportFileData {
   csvData?: { [key: string]: any }[];
@@ -31,7 +34,7 @@ export enum ExportFileTypes {
 
 @Entity()
 export class ExportFile extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: number;
 
   @Column()
@@ -49,9 +52,6 @@ export class ExportFile extends BaseEntity {
   @IsEnum(ExportFileTypes)
   type: ExportFileTypes;
 
-  @Column({ nullable: true })
-  path: string;
-
   @Column({
     type: 'enum',
     enum: ExportFileStatus,
@@ -67,6 +67,12 @@ export class ExportFile extends BaseEntity {
   @UpdateDateColumn()
   public updatedAt: Date;
 
+  @BeforeUpdate()
+  @BeforeInsert()
+  public async validate() {
+    await validateOrReject(this);
+  }
+
   public getKey(): string {
     return `${this.id}.${this.type}`;
   }
@@ -77,12 +83,6 @@ export class ExportFile extends BaseEntity {
 
   public async processExport(data: ExportFileData): Promise<void> {
     const s3Options: S3.ClientConfiguration = { region: process.env.AWS_REGION };
-
-    if (process.env.AWS_ENDPOINT) {
-      s3Options.endpoint = `http://${process.env.AWS_ENDPOINT}:4572`;
-      s3Options.s3ForcePathStyle = true;
-    }
-
     const exporter = new Exporter(new S3(s3Options), this, data);
 
     try {
@@ -90,6 +90,7 @@ export class ExportFile extends BaseEntity {
       this.status = ExportFileStatus.SUCCESS;
     } catch (ex) {
       this.status = ExportFileStatus.FAILED;
+      console.log('failure', ex);
     }
 
     await this.save();
@@ -98,7 +99,7 @@ export class ExportFile extends BaseEntity {
   public getDownloadUrl(): string {
     const s3 = new S3();
     return s3.getSignedUrl('getObject', {
-      Bucket: process.env.AWS_EXPORT_BUCKET,
+      Bucket: process.env.AWS_BUCKET,
       Key: this.getKey(),
       Expires: 300,
     });
