@@ -1,23 +1,19 @@
-import * as koa from 'koa';
-import * as bodyParser from 'koa-bodyparser';
-import * as Router from 'koa-router';
-import * as cors from 'kcors';
+import * as express from 'express';
+import * as bodyParser from 'body-parser';
 import { statusCheck } from './routes/status-check';
-import { handleErrors, corsRules } from './middleware';
-import { initApiRoutes } from './routes/api/api-routes';
+import { fileRoutes } from './routes/api/file/file-routes';
+import { errorHandler, corsRules } from './middleware';
+import * as helmet from 'helmet';
+import * as cors from 'cors';
+import { checkJwt } from './middleware/checkJwt';
 
-export const createApp = (): koa<koa.DefaultState, koa.DefaultContext> => {
-  const app = new koa();
-  const router = new Router();
-
-  app.use(handleErrors);
-  app.use(bodyParser());
-  app.use(cors({ origin: corsRules, credentials: true }));
-
-  initApiRoutes(router);
-  router.get('/status-check', statusCheck);
-
-  app.use(router.routes());
-
+export const createApp = (): express.Express => {
+  const app = express();
+  app.use(helmet());
+  app.use(cors(corsRules));
+  app.use(bodyParser.json());
+  app.use('/api', checkJwt, fileRoutes);
+  app.get('/status-check', statusCheck);
+  app.use(errorHandler);
   return app;
 };

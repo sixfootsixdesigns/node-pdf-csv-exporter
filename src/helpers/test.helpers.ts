@@ -9,6 +9,6 @@ export const getTestApp = async (): Promise<http.Server> => {
     return app;
   }
   await createConnection();
-  app = http.createServer(createApp().callback());
+  app = http.createServer(createApp());
   return app;
 };

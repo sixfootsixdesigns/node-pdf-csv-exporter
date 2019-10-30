@@ -1,5 +1,3 @@
-import { config } from 'dotenv';
-config();
 import { createConnection } from 'typeorm';
 import { createApp } from './app';
 

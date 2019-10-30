@@ -1,13 +1,13 @@
 import { buildResponseBody } from '../../../lib/response';
 import { getRepository } from 'typeorm';
-import * as Router from 'koa-router';
-import * as Koa from 'koa';
+import * as express from 'express';
 import { ExportFile } from '../../../entity/ExportFile';
-import { ApiValidationError } from '../../../lib/error';
+import { ApiValidationError } from '../../../lib/apiValidationError';
+import { asyncHandler } from '../../../middleware/asyncHandler';
 
-async function insert(ctx: Koa.ParameterizedContext) {
+async function insert(req: express.Request, res: express.Response) {
   const repository = getRepository(ExportFile);
-  const { data, ...exportFile } = ctx.request.body;
+  const { data, ...exportFile } = req.body;
 
   if (!data) {
     throw new ApiValidationError('You must send data');
@@ -22,37 +22,36 @@ async function insert(ctx: Koa.ParameterizedContext) {
     // don't care
   });
 
-  ctx.body = buildResponseBody(result);
+  res.json(buildResponseBody(result));
 }
 
-async function updateById(ctx: Koa.ParameterizedContext) {
+async function updateById(req: express.Request, res: express.Response) {
   const repository = getRepository(ExportFile);
-  const fileData = await repository.findOneOrFail(ctx.params.id);
+  const fileData = await repository.findOneOrFail(req.params.id);
 
-  repository.merge(fileData, ctx.request.body);
+  repository.merge(fileData, req.body);
 
   const results = await repository.save(fileData);
 
-  ctx.body = buildResponseBody(results);
+  res.json(buildResponseBody(results));
 }
 
-async function getDownloadLinkById(ctx: Koa.ParameterizedContext) {
+async function getDownloadLinkById(req: express.Request, res: express.Response) {
   const repository = getRepository(ExportFile);
 
-  const fileData = await repository.findOneOrFail(ctx.params.id);
+  const fileData = await repository.findOneOrFail(req.params.id);
 
-  ctx.body = buildResponseBody({ downloadUrl: fileData.getDownloadUrl() });
+  res.json(buildResponseBody({ downloadUrl: fileData.getDownloadUrl() }));
 }
 
-async function getById(ctx: Koa.ParameterizedContext) {
+async function getById(req: express.Request, res: express.Response) {
   const repository = getRepository(ExportFile);
-  const fileData = await repository.findOneOrFail(ctx.params.id);
-  ctx.body = buildResponseBody(fileData);
+  const fileData = await repository.findOneOrFail(req.params.id);
+  res.json(buildResponseBody(fileData));
 }
 
-export const initFileRoutes = (router: Router) => {
-  router.post('/file/create', insert);
-  router.put('/file/update/:id', updateById);
-  router.get('/file/download/:id', getDownloadLinkById);
-  router.get('/file/:id', getById);
-};
+export const fileRoutes = express.Router();
+fileRoutes.post('/file/create', asyncHandler(insert));
+fileRoutes.put('/file/update/:id', asyncHandler(updateById));
+fileRoutes.get('/file/download/:id', asyncHandler(getDownloadLinkById));
+fileRoutes.get('/file/:id', asyncHandler(getById));

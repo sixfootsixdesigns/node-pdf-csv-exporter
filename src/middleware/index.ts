@@ -1,2 +1,2 @@
-export * from './cors-rules';
-export * from './error-handler';
+export * from './corsRules';
+export * from './errorHandler';

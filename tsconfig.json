@@ -1,18 +1,14 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "allowSyntheticDefaultImports": false,
     "emitDecoratorMetadata": true,
-    "esModuleInterop": false,
     "experimentalDecorators": true,
     "lib": ["es5", "es6", "dom"],
     "module": "commonjs",
     "moduleResolution": "node",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "outDir": "dist",
     "sourceMap": true,
-    "target": "es6",
-    "types": ["jest"]
+    "target": "es6"
   },
   "include": ["./src/**/*"],
   "exclude": ["./src/__tests__/**/*"]

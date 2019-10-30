@@ -1,6 +1,6 @@
 import { buildResponseBody } from '../lib/response';
+import * as express from 'express';
 
-export const statusCheck = async (ctx, next) => {
-  const body = buildResponseBody("It's up");
-  ctx.body = body;
+export const statusCheck = (req: express.Request, res: express.Response) => {
+  res.json(buildResponseBody("It's up"));
 };
