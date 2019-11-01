@@ -4,17 +4,7 @@ import { createApp } from './app';
 const port = process.env.PORT || 3000;
 
 createConnection().then(() => {
-  const app = createApp();
-  app.listen(port, () => {
-    console.log('info', `app is listening on port ${port}`, 'application');
+  createApp().listen(port, () => {
+    console.log(`app is listening on port ${port}`);
   });
 });
-
-process
-  .on('unhandledRejection', (reason, p) => {
-    console.log('error', reason, 'unhandledRejection');
-  })
-  .on('uncaughtException', err => {
-    console.log('error', err, 'uncaughtException');
-    process.exit(1);
-  });

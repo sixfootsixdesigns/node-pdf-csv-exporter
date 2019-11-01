@@ -1,11 +1,10 @@
-import { buildResponseBody } from '../../../lib/response';
+import { buildResponseBody } from '../lib/response';
 import { getRepository } from 'typeorm';
 import * as express from 'express';
-import { ExportFile } from '../../../entity/ExportFile';
-import { ApiValidationError } from '../../../lib/apiValidationError';
-import { asyncHandler } from '../../../middleware/asyncHandler';
+import { ExportFile } from '../entity/ExportFile';
+import { ApiValidationError } from '../lib/apiValidationError';
 
-async function insert(req: express.Request, res: express.Response) {
+const insert = async (req: express.Request, res: express.Response) => {
   const repository = getRepository(ExportFile);
   const { data, ...exportFile } = req.body;
 
@@ -23,9 +22,9 @@ async function insert(req: express.Request, res: express.Response) {
   });
 
   res.json(buildResponseBody(result));
-}
+};
 
-async function updateById(req: express.Request, res: express.Response) {
+const updateById = async (req: express.Request, res: express.Response) => {
   const repository = getRepository(ExportFile);
   const fileData = await repository.findOneOrFail(req.params.id);
 
@@ -34,24 +33,25 @@ async function updateById(req: express.Request, res: express.Response) {
   const results = await repository.save(fileData);
 
   res.json(buildResponseBody(results));
-}
+};
 
-async function getDownloadLinkById(req: express.Request, res: express.Response) {
+const getDownloadLinkById = async (req: express.Request, res: express.Response) => {
   const repository = getRepository(ExportFile);
 
   const fileData = await repository.findOneOrFail(req.params.id);
 
   res.json(buildResponseBody({ downloadUrl: fileData.getDownloadUrl() }));
-}
+};
 
-async function getById(req: express.Request, res: express.Response) {
+const getById = async (req: express.Request, res: express.Response) => {
   const repository = getRepository(ExportFile);
   const fileData = await repository.findOneOrFail(req.params.id);
   res.json(buildResponseBody(fileData));
-}
+};
 
-export const fileRoutes = express.Router();
-fileRoutes.post('/file/create', asyncHandler(insert));
-fileRoutes.put('/file/update/:id', asyncHandler(updateById));
-fileRoutes.get('/file/download/:id', asyncHandler(getDownloadLinkById));
-fileRoutes.get('/file/:id', asyncHandler(getById));
+export const filesController = {
+  getById,
+  getDownloadLinkById,
+  insert,
+  updateById,
+};

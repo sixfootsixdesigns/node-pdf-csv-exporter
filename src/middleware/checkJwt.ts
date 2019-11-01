@@ -6,9 +6,9 @@ export const checkJwt = jwt({
     cache: true,
     rateLimit: true,
     jwksRequestsPerMinute: 5,
-    jwksUri: `https://YOUR_DOMAIN/.well-known/jwks.json`,
+    jwksUri: `${process.env.AUTH_DOMAIN}/.well-known/jwks.json`,
   }),
-  audience: 'YOUR_API_IDENTIFIER',
-  issuer: `https://YOUR_DOMAIN/`,
+  audience: process.env.AUTH_AUDIENCE,
+  issuer: process.env.AUTH_ISSUER,
   algorithms: ['RS256'],
 });

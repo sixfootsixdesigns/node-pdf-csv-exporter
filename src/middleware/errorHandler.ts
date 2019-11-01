@@ -6,6 +6,7 @@ const statusByErrorName = (errorName: string | undefined): number => {
       return 404;
     case 'ApiValidationError':
       return 400;
+    case 'ExportError':
     default:
       return 500;
   }

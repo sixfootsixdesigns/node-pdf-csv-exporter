@@ -4,8 +4,8 @@ import {
   ExportFileTypes,
   ExportFileWithData,
   ExportFileStatus,
-} from '../../../../entity/ExportFile';
-import { getTestApp } from '../../../../helpers/test.helpers';
+} from '../../../entity/ExportFile';
+import { getTestApp } from '../../../helpers/test.helpers';
 import { getRepository } from 'typeorm';
 
 describe('File Routes', () => {

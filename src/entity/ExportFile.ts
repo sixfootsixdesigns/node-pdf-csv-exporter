@@ -12,6 +12,7 @@ import { IsOptional, IsNotEmpty, IsEnum } from 'class-validator';
 import { S3 } from 'aws-sdk';
 import { Exporter } from '../lib/exporter';
 import { validateOrReject } from 'class-validator';
+import { logger } from '../lib/logger';
 
 export interface ExportFileData {
   csvData?: { [key: string]: any }[];
@@ -89,8 +90,11 @@ export class ExportFile extends BaseEntity {
       await exporter.export();
       this.status = ExportFileStatus.SUCCESS;
     } catch (ex) {
+      logger.log({
+        level: 'error',
+        message: ex.message,
+      });
       this.status = ExportFileStatus.FAILED;
-      console.log('failure', ex);
     }
 
     await this.save();
