@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@types/helmet": "^0.0.45",
-    "aws-sdk": "^2.556.0",
+    "aws-sdk": "^2.814.0",
     "body-parser": "^1.19.0",
     "class-validator": "^0.10.2",
     "cors": "^2.8.5",
